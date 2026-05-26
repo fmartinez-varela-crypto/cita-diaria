@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cita del día para Giovanna</title>
+
+  <meta name="description" content="Una cita literaria o filosófica cada día.">
+  <meta name="theme-color" content="#0f1419">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cita del día">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #0f1419;
+      --bg-2: #1a2332;
+      --card: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --ink: #f5f1e8;
+      --ink-dim: #a8a094;
+      --accent: #d4a574;
+      --shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at top left, #2a3548 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, #3d2a3a 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 24px 48px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .header { text-align: center; margin-bottom: 48px; }
+    .date {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 12px;
+    }
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 32px;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+    }
+    .brand::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background: var(--accent);
+      margin: 16px auto 0;
+    }
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 56px 40px 48px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+      animation: fadeIn 0.6s ease-out;
+    }
+    .quote-mark {
+      position: absolute;
+      top: 8px;
+      left: 24px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 96px;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.4;
+      font-style: italic;
+    }
+    .quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 26px;
+      line-height: 1.5;
+      color: var(--ink);
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .author {
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: right;
+    }
+    .author::before { content: '— '; }
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: var(--accent);
+      color: #1a1410;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 24px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -8px rgba(212, 165, 116, 0.6);
+    }
+    .btn:active { transform: translateY(0); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-dim);
+      border: 1px solid var(--card-border);
+    }
+    .btn-ghost:hover {
+      color: var(--ink);
+      border-color: var(--accent);
+      box-shadow: none;
+    }
+    .hint {
+      margin-top: auto;
+      padding-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-dim);
+      min-height: 18px;
+      transition: opacity 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card.swap { animation: fadeIn 0.4s ease-out; }
+    @media (max-width: 560px) {
+      .container { padding: 40px 20px 32px; }
+      .card { padding: 44px 28px 36px; }
+      .quote { font-size: 22px; }
+      .brand { font-size: 28px; }
+      .quote-mark { font-size: 72px; top: 4px; left: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <p class="date" id="date"></p>
+      <h1 class="brand">Cita del día para Giovanna</h1>
+    </header>
+
+    <section class="card" id="card">
+      <div class="quote-mark">&ldquo;</div>
+      <blockquote class="quote" id="quote">Cargando...</blockquote>
+      <p class="author" id="author"></p>
+    </section>
+
+    <footer class="controls">
+      <button id="newQuote" class="btn">Otra cita</button>
+      <button id="copyQuote" class="btn btn-ghost">Copiar</button>
+      <button id="shareQuote" class="btn btn-ghost">Compartir</button>
+    </footer>
+
+    <p class="hint" id="hint"></p>
+  </main>
+
+  <script>
+    const QUOTES = [
+      { t: "El hombre es la medida de todas las cosas.", a: "Protágoras" },
+      { t: "El asombro es el principio de la filosofía.", a: "Platón" },
+      { t: "Podemos perdonar a un niño que tiene miedo a la oscuridad; la verdadera tragedia es cuando los hombres tienen miedo a la luz.", a: "Platón" },
+      { t: "Somos lo que hacemos repetidamente. La excelencia, entonces, no es un acto, sino un hábito.", a: "Aristóteles" },
+      { t: "No podemos bañarnos dos veces en el mismo río.", a: "Heráclito" },
+      { t: "Dios ha muerto. Dios sigue muerto. Y nosotros lo hemos matado.", a: "Friedrich Nietzsche" },
+      { t: "Aquel que tiene un porqué para vivir, puede soportar casi cualquier cómo.", a: "Friedrich Nietzsche" },
+      { t: "Quien lucha con monstruos debe cuidarse de no convertirse a su vez en monstruo.", a: "Friedrich Nietzsche" },
+      { t: "No hay hechos, solo interpretaciones.", a: "Friedrich Nietzsche" },
+      { t: "El hombre está condenado a ser libre.", a: "Jean-Paul Sartre" },
+      { t: "El infierno son los otros.", a: "Jean-Paul Sartre" },
+      { t: "Comencé entonces a comprender que el ser humano es el animal que cuenta historias.", a: "Jean-Paul Sartre" },
+      { t: "Hay que imaginar a Sísifo dichoso.", a: "Albert Camus" },
+      { t: "La vida solo puede ser comprendida mirando hacia atrás, pero ha de ser vivida mirando hacia adelante.", a: "Søren Kierkegaard" },
+      { t: "Atrévete a saber.", a: "Immanuel Kant" },
+      { t: "Obra de tal modo que uses la humanidad siempre como un fin, nunca como un medio.", a: "Immanuel Kant" },
+      { t: "La libertad consiste en hacer todo lo que las leyes permiten.", a: "Montesquieu" },
+      { t: "El hombre nace libre, y en todas partes se encuentra encadenado.", a: "Jean-Jacques Rousseau" },
+      { t: "Para conocer al hombre, basta estudiarse a uno mismo; para conocer a los hombres, hay que ir entre ellos.", a: "Jean-Jacques Rousseau" },
+      { t: "Toda nuestra dignidad consiste en el pensamiento.", a: "Blaise Pascal" },
+      { t: "Mientras esperamos vivir, la vida pasa.", a: "Séneca" },
+      { t: "Quien no ha conocido la adversidad no se conoce a sí mismo.", a: "Séneca" },
+      { t: "Las personas felices recuerdan el pasado con gratitud, se regocijan en el presente y se enfrentan al futuro sin miedo.", a: "Epicuro" },
+      { t: "La muerte no es nada para nosotros, ya que cuando somos, la muerte no está, y cuando la muerte está, ya no somos nosotros.", a: "Epicuro" },
+      { t: "Solo es útil el conocimiento que nos hace mejores.", a: "Sócrates" },
+      { t: "Lo poco que he aprendido carece de valor, comparado con lo que ignoro y no desespero en aprender.", a: "René Descartes" },
+      { t: "Entre estímulo y respuesta hay un espacio. En ese espacio está nuestro poder de elegir nuestra respuesta.", a: "Viktor Frankl" },
+      { t: "Cuando ya no somos capaces de cambiar una situación, nos encontramos con el desafío de cambiarnos a nosotros mismos.", a: "Viktor Frankl" },
+      { t: "La realidad es aquello que, cuando dejas de creer en ello, no desaparece.", a: "Philip K. Dick" },
+      { t: "El lector vive mil vidas antes de morir; el hombre que nunca lee vive solo una.", a: "George R. R. Martin" },
+      { t: "Un libro debe ser un hacha que rompa el mar helado dentro de nosotros.", a: "Franz Kafka" },
+      { t: "La literatura siempre es una expedición a la verdad.", a: "Franz Kafka" },
+      { t: "Todos los hombres tienen tres vidas: una pública, una privada y otra secreta.", a: "Gabriel García Márquez" },
+      { t: "Lo que se nos da no nos pertenece todavía. Hay que ganarlo.", a: "Hermann Hesse" },
+      { t: "Tal vez no estamos hechos para ser felices, sino para tener historias que contar.", a: "Isabel Allende" },
+      { t: "La belleza salvará al mundo.", a: "Fiódor Dostoyevski" },
+      { t: "Si Dios no existe, todo está permitido.", a: "Fiódor Dostoyevski" },
+      { t: "Caminante, no hay camino, se hace camino al andar.", a: "Antonio Machado" },
+      { t: "Hoy es siempre todavía.", a: "Antonio Machado" },
+      { t: "Cuando teníamos todas las respuestas, nos cambiaron las preguntas.", a: "Mario Benedetti" },
+      { t: "El que lee mucho y anda mucho, ve mucho y sabe mucho.", a: "Miguel de Cervantes" },
+      { t: "La libertad, Sancho, es uno de los más preciosos dones que a los hombres dieron los cielos.", a: "Miguel de Cervantes" },
+      { t: "Los que sueñan de día son conscientes de muchas cosas que escapan a los que sueñan solo de noche.", a: "Edgar Allan Poe" },
+      { t: "La filosofía es una batalla contra el embrujamiento de nuestra inteligencia por medio del lenguaje.", a: "Ludwig Wittgenstein" },
+      { t: "Los límites de mi lenguaje son los límites de mi mundo.", a: "Ludwig Wittgenstein" },
+      { t: "De lo que no se puede hablar, hay que callar.", a: "Ludwig Wittgenstein" },
+      { t: "El hombre es un dios cuando sueña y un mendigo cuando reflexiona.", a: "Friedrich Hölderlin" },
+      { t: "El que tiene imaginación, con qué facilidad saca de la nada un mundo.", a: "Gustavo Adolfo Bécquer" },
+      { t: "La vida es un sueño, y los sueños, sueños son.", a: "Pedro Calderón de la Barca" },
+      { t: "Hay más cosas en el cielo y en la tierra, Horacio, de las que sueña tu filosofía.", a: "William Shakespeare" },
+      { t: "Sabemos lo que somos, pero no lo que podemos llegar a ser.", a: "William Shakespeare" },
+      { t: "El hombre razonable se adapta al mundo; el irrazonable persiste en tratar de adaptar el mundo a sí mismo.", a: "George Bernard Shaw" },
+      { t: "Quien se conoce a sí mismo es señor de sí.", a: "Pierre Charron" },
+      { t: "Nada grande se ha hecho en el mundo sin pasión.", a: "G. W. F. Hegel" },
+      { t: "El búho de Minerva alza su vuelo al atardecer.", a: "G. W. F. Hegel" },
+      { t: "La filosofía es su tiempo aprehendido en pensamientos.", a: "G. W. F. Hegel" },
+      { t: "Lo real es racional y lo racional es real.", a: "G. W. F. Hegel" },
+      { t: "La historia universal es el progreso en la conciencia de la libertad.", a: "G. W. F. Hegel" },
+      { t: "El lenguaje es la casa del ser.", a: "Martin Heidegger" },
+      { t: "Solo un Dios puede aún salvarnos.", a: "Martin Heidegger" },
+      { t: "El hombre habita poéticamente la tierra.", a: "Martin Heidegger" },
+      { t: "La pregunta por el ser cae hoy en el olvido.", a: "Martin Heidegger" },
+      { t: "Pensar es agradecer.", a: "Martin Heidegger" },
+      { t: "Cada uno es lo que persigue.", a: "Martin Heidegger" },
+      { t: "El carácter del hombre es su destino.", a: "Heráclito" },
+      { t: "La naturaleza ama ocultarse.", a: "Heráclito" },
+      { t: "La guerra es el padre de todas las cosas y el rey de todo.", a: "Heráclito" },
+      { t: "El camino hacia arriba y el camino hacia abajo son uno y el mismo.", a: "Heráclito" },
+      { t: "Los que están despiertos tienen un mundo único y común; los que duermen se vuelven cada uno a su propio mundo.", a: "Heráclito" },
+      { t: "Solo la comunicación comunica.", a: "Niklas Luhmann" },
+      { t: "Lo que sabemos sobre nuestra sociedad, e incluso sobre el mundo en que vivimos, lo sabemos a través de los medios de comunicación de masas.", a: "Niklas Luhmann" },
+      { t: "La sociedad no se compone de seres humanos, se compone de comunicaciones.", a: "Niklas Luhmann" },
+      { t: "Quien quiera conocer la verdad sobre la sociedad debe contar con su complejidad.", a: "Niklas Luhmann" },
+      { t: "El amor no es un sentimiento, sino un código de comunicación según cuyas reglas se expresan, se forman y se simulan sentimientos.", a: "Niklas Luhmann" },
+      { t: "Todo lo que se dice, lo dice un observador a otro observador.", a: "Niklas Luhmann" },
+      { t: "El sentido es la unidad de la diferencia entre actualidad y posibilidad.", a: "Niklas Luhmann" },
+      { t: "La confianza es un mecanismo de reducción de la complejidad social.", a: "Niklas Luhmann" },
+
+      { t: "En medio del camino de nuestra vida me encontré por una selva oscura, porque la recta vía era perdida.", a: "Dante Alighieri, Divina Comedia (c. 1320)" },
+      { t: "Cuando abril con sus dulces aguaceros ha penetrado la sequía de marzo hasta la raíz, y bañado cada vena en aquel licor cuya virtud engendra la flor, peregrinos van.", a: "Geoffrey Chaucer, Cuentos de Canterbury (c. 1387)" },
+      { t: "Nuestras vidas son los ríos que van a dar en la mar, que es el morir; allí van los señoríos derechos a se acabar y consumir.", a: "Jorge Manrique, Coplas por la muerte de su padre (c. 1476)" },
+      { t: "En tanto que de rosa y azucena se muestra la color en vuestro gesto, y que vuestro mirar, ardiente, honesto, enciende al corazón y lo refrena… Coged de vuestra alegre primavera el dulce fruto antes que el tiempo airado cubra de nieve la hermosa cumbre.", a: "Garcilaso de la Vega, Soneto XXIII (c. 1543)" },
+      { t: "En una noche oscura, con ansias en amores inflamada, ¡oh dichosa ventura!, salí sin ser notada, estando ya mi casa sosegada.", a: "San Juan de la Cruz, Noche oscura (c. 1578)" },
+      { t: "Ningún hombre es una isla entera por sí mismo; cada hombre es una pieza del continente, una parte del todo. La muerte de cualquier hombre me disminuye, porque estoy ligado a la humanidad; y por eso nunca preguntes por quién doblan las campanas: doblan por ti.", a: "John Donne, Meditación XVII (1624)" },
+      { t: "¿Te compararé a un día de verano? Tú eres más adorable y más templado: vientos rudos sacuden los capullos de mayo, y el estío termina antes de lo esperado.", a: "William Shakespeare, Soneto XVIII (1609)" },
+      { t: "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Se enfrascó tanto en la lectura, que se le pasaban las noches leyendo de claro en claro, y los días de turbio en turbio; y así, del poco dormir y del mucho leer, se le secó el cerebro, de manera que vino a perder el juicio.", a: "Miguel de Cervantes, Don Quijote (1605)" },
+      { t: "Alma a quien todo un dios prisión ha sido, venas que humor a tanto fuego han dado, médulas que han gloriosamente ardido: su cuerpo dejará, no su cuidado; serán ceniza, mas tendrá sentido; polvo serán, mas polvo enamorado.", a: "Francisco de Quevedo, Amor constante más allá de la muerte (c. 1648)" },
+      { t: "¿Qué es la vida? Un frenesí. ¿Qué es la vida? Una ilusión, una sombra, una ficción, y el mayor bien es pequeño; que toda la vida es sueño, y los sueños, sueños son.", a: "Pedro Calderón de la Barca, La vida es sueño (1635)" },
+      { t: "Hombres necios que acusáis a la mujer sin razón, sin ver que sois la ocasión de lo mismo que culpáis.", a: "Sor Juana Inés de la Cruz, Hombres necios (c. 1689)" },
+      { t: "De la primera desobediencia del hombre, y del fruto de aquel árbol prohibido cuyo bocado mortal trajo al mundo la muerte, canta, musa celestial.", a: "John Milton, El paraíso perdido (1667)" },
+      { t: "Es una verdad universalmente reconocida que un hombre soltero, poseedor de una gran fortuna, necesita esposa. Por poco conocidos que sean los sentimientos u opiniones de un hombre así, esta verdad está tan arraigada en las mentes de las familias del vecindario, que se le considera propiedad legítima de alguna de sus hijas.", a: "Jane Austen, Orgullo y prejuicio (1813)" },
+      { t: "Llamadme Ismael. Hace unos años, no importa cuántos exactamente, teniendo poco o ningún dinero en el bolsillo y nada en particular que me interesara en tierra, pensé que me haría a la mar y vería la parte acuosa del mundo. Es un modo que tengo de espantar la melancolía y arreglar la circulación.", a: "Herman Melville, Moby Dick (1851)" },
+      { t: "Era el mejor de los tiempos, era el peor de los tiempos, era la edad de la sabiduría, era la edad de la locura, era la época de la fe, era la época de la incredulidad, era la estación de la Luz, era la estación de las Tinieblas, era la primavera de la esperanza, era el invierno de la desesperación.", a: "Charles Dickens, Historia de dos ciudades (1859)" },
+      { t: "Todas las familias felices se parecen, pero cada familia infeliz lo es a su manera.", a: "León Tolstói, Ana Karénina (1877)" },
+      { t: "Es el Aburrimiento. Los ojos cargados de un llanto involuntario, sueña con cadalsos mientras fuma su pipa. Tú lo conoces, lector, ese monstruo delicado: ¡hipócrita lector, mi semejante, mi hermano!", a: "Charles Baudelaire, Las flores del mal (1857)" },
+      { t: "Volverán las oscuras golondrinas en tu balcón sus nidos a colgar, y otra vez con el ala a sus cristales jugando llamarán; pero aquellas que el vuelo refrenaban tu hermosura y mi dicha al contemplar, ¡esas no volverán!", a: "Gustavo Adolfo Bécquer, Rima LIII (1871)" },
+      { t: "Y el cuervo, sin alzar el vuelo, sigue inmóvil sobre el pálido busto de Palas que hay sobre mi puerta; y sus ojos tienen el aspecto de un demonio que sueña, y la luz al proyectar su sombra sobre el suelo, mi alma, de esa sombra que allí flota, no podrá librarse jamás. «Nunca más.»", a: "Edgar Allan Poe, El cuervo (1845)" },
+      { t: "Un golpe de dados jamás abolirá el azar.", a: "Stéphane Mallarmé, Un golpe de dados (1897)" },
+      { t: "Yo soy aquel que ayer no más decía el verso azul y la canción profana, en cuya noche un ruiseñor había que era alondra de luz por la mañana.", a: "Rubén Darío, Cantos de vida y esperanza (1905)" },
+      { t: "Cuando Gregorio Samsa se despertó una mañana después de un sueño intranquilo, se encontró sobre su cama convertido en un monstruoso insecto.", a: "Franz Kafka, La metamorfosis (1915)" },
+      { t: "Durante mucho tiempo me acosté temprano. A veces, apenas había apagado la vela, mis ojos se cerraban tan deprisa que ni siquiera tenía tiempo de decirme: «Me estoy durmiendo». Y media hora después me despertaba la idea de que ya era hora de buscar el sueño.", a: "Marcel Proust, En busca del tiempo perdido (1913)" },
+      { t: "Vamos entonces, tú y yo, cuando la tarde se extiende contra el cielo como un paciente anestesiado sobre una mesa.", a: "T. S. Eliot, La canción de amor de J. Alfred Prufrock (1915)" },
+      { t: "Hay golpes en la vida, tan fuertes… ¡Yo no sé! Golpes como del odio de Dios; como si ante ellos, la resaca de todo lo sufrido se empozara en el alma… ¡Yo no sé!", a: "César Vallejo, Los heraldos negros (1919)" },
+      { t: "y entonces le pedí con los ojos que me lo pidiera otra vez sí y entonces él me preguntó si quería sí decir sí mi flor de la montaña y primero le rodeé con mis brazos sí y le atraje hacia mí para que pudiera sentir mis pechos todo perfume sí y su corazón parecía enloquecido y sí dije sí quiero Sí.", a: "James Joyce, Ulises (1922)" },
+      { t: "Puedo escribir los versos más tristes esta noche. Escribir, por ejemplo: «La noche está estrellada, y tiritan, azules, los astros, a lo lejos».", a: "Pablo Neruda, Veinte poemas de amor (1924)" },
+      { t: "La señora Dalloway dijo que ella misma compraría las flores. Pues Lucy ya tenía bastante trabajo. Habría que desmontar las puertas; vendrían los hombres de Rumpelmayer. Y entonces, pensó Clarissa Dalloway, ¡qué mañana, fresca como entregada a niños en la playa!", a: "Virginia Woolf, La señora Dalloway (1925)" },
+      { t: "Verde que te quiero verde. Verde viento. Verdes ramas. El barco sobre la mar y el caballo en la montaña.", a: "Federico García Lorca, Romance sonámbulo (1928)" },
+      { t: "Hoy ha muerto mamá. O quizá ayer, no sé. Recibí un telegrama del asilo: «Madre fallecida. Entierro mañana. Sentido pésame.» Pero no quiere decir nada. Quizá haya sido ayer.", a: "Albert Camus, El extranjero (1942)" },
+      { t: "Era un día luminoso y frío de abril, y los relojes daban las trece. Winston Smith, con la barbilla hundida en el pecho en un esfuerzo por escapar al viento maligno, se deslizó rápidamente por las puertas de cristal de las Casas de la Victoria, aunque no con la suficiente rapidez como para impedir que una ráfaga de polvo arenoso entrara con él.", a: "George Orwell, 1984 (1949)" },
+      { t: "Lolita, luz de mi vida, fuego de mis entrañas. Pecado mío, alma mía. Lo-li-ta: la punta de la lengua emprende un viaje de tres pasos paladar abajo hasta apoyarse, en el tercero, en el borde de los dientes. Lo. Li. Ta.", a: "Vladimir Nabokov, Lolita (1955)" },
+      { t: "Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo.", a: "Juan Rulfo, Pedro Páramo (1955)" },
+      { t: "Hay una hora del atardecer en que la llanura está por decir algo; nunca lo dice, o tal vez lo dice infinitamente y no lo entendemos, o lo entendemos pero es intraducible como una música.", a: "Jorge Luis Borges, El fin (1956)" },
+      { t: "¿Encontraría a la Maga? Tantas veces me había bastado asomarme, viniendo por la rue de Seine, al arco que da al Quai de Conti, y apenas la luz de ceniza y olivo que flota sobre el río me dejaba distinguir las formas, ya su silueta delgada se inscribía en el Pont des Arts.", a: "Julio Cortázar, Rayuela (1963)" },
+      { t: "Muchos años después, frente al pelotón de fusilamiento, el coronel Aureliano Buendía había de recordar aquella tarde remota en que su padre lo llevó a conocer el hielo.", a: "Gabriel García Márquez, Cien años de soledad (1967)" },
+      { t: "No soy nada. Nunca seré nada. No puedo querer ser nada. Aparte de eso, llevo en mí todos los sueños del mundo.", a: "Fernando Pessoa, Libro del desasosiego (1982)" },
+      { t: "No nos quedamos ciegos, creo que estamos ciegos. Ciegos que ven. Ciegos que, viendo, no ven. Cuando los ciegos lloran, tienen los ojos abiertos.", a: "José Saramago, Ensayo sobre la ceguera (1995)" },
+      { t: "La primera vez que Jean-Claude Pelletier leyó a Benno von Archimboldi fue en la Navidad de 1980, en París, donde cursaba estudios universitarios de literatura alemana, a la edad de diecinueve años.", a: "Roberto Bolaño, 2666 (2004)" },
+      { t: "Antes de que mi mujer se hiciera vegetariana, yo siempre la consideré completamente vulgar. La elegí precisamente porque no me atraía. Sin un encanto destacable, sin defectos importantes ni virtudes especiales, parecía una mujer normal. Pero, por algún motivo, desde aquel día empezó a soñar.", a: "Han Kang, La vegetariana (2007)" },
+      { t: "Para el corazón, la vida es simple: late mientras pueda. Luego se detiene. Tarde o temprano, un día, este movimiento de bombeo cesará por su cuenta y la sangre comenzará a fluir hacia el punto más bajo del cuerpo, donde se acumulará en una pequeña charca.", a: "Karl Ove Knausgård, Mi lucha (2009)" },
+
+      { t: "El loco no es el hombre que ha perdido la razón. El loco es el hombre que lo ha perdido todo menos la razón.", a: "G. K. Chesterton" },
+      { t: "La tradición es la democracia de los muertos: rehúsa someterse a la pequeña y arrogante oligarquía de quienes simplemente andan por ahí.", a: "G. K. Chesterton" },
+      { t: "Los cuentos de hadas no enseñan a los niños que los dragones existen: los niños ya saben que los dragones existen. Les enseñan que pueden ser vencidos.", a: "G. K. Chesterton" },
+      { t: "El periodismo consiste, en gran parte, en decir «Lord Jones ha muerto» a gente que ni siquiera sabía que Lord Jones estaba vivo.", a: "G. K. Chesterton" },
+      { t: "Si una cosa vale la pena de hacerse, vale la pena de hacerse mal.", a: "G. K. Chesterton" },
+      { t: "El verdadero soldado no lucha porque odie lo que tiene delante, sino porque ama lo que tiene detrás.", a: "G. K. Chesterton" },
+      { t: "La gratitud es la madre de todas las virtudes, y la más alta forma del pensamiento.", a: "G. K. Chesterton" },
+      { t: "Una aventura no es más que una incomodidad correctamente considerada; una incomodidad no es más que una aventura mal considerada.", a: "G. K. Chesterton" },
+
+      { t: "Me celebro y me canto a mí mismo, y lo que yo asumo tú lo asumirás, pues cada átomo que me pertenece, también te pertenece a ti.", a: "Walt Whitman, Canto de mí mismo (1855)" },
+      { t: "¿Que me contradigo? Pues sí, me contradigo. Soy amplio, contengo multitudes.", a: "Walt Whitman, Canto de mí mismo (1855)" },
+      { t: "Resiste mucho, obedece poco.", a: "Walt Whitman, A los Estados (1860)" },
+      { t: "¡Oh capitán, mi capitán! Nuestro espantoso viaje ha terminado, el barco ha capeado los escollos, hemos ganado el premio anhelado.", a: "Walt Whitman, ¡Oh capitán, mi capitán! (1865)" },
+      { t: "No te detengas. No te despidas. No me digas adiós sin decirme antes que la vida es así, una despedida.", a: "Walt Whitman" },
+      { t: "Sé curioso, no juzgues. Mira con tus propios ojos.", a: "Walt Whitman" },
+      { t: "No hay fuera-de-texto.", a: "Jacques Derrida, De la gramatología (1967)" },
+      { t: "La justicia es indeconstruible: la deconstrucción es justicia.", a: "Jacques Derrida, Fuerza de ley (1989)" },
+      { t: "La diferencia, la différance, no es ni una palabra ni un concepto.", a: "Jacques Derrida, Márgenes de la filosofía (1972)" },
+      { t: "No tenemos más que un solo lenguaje, y no es el nuestro.", a: "Jacques Derrida, El monolingüismo del otro (1996)" },
+      { t: "Aprender a vivir, ¿debería significar aprender a morir, a tener en cuenta, para aceptarla, la mortalidad absoluta?", a: "Jacques Derrida, Espectros de Marx (1993)" },
+      { t: "La hospitalidad absoluta exige que abra mi casa al otro absolutamente desconocido y le dé lugar sin pedirle ni reciprocidad ni siquiera su nombre.", a: "Jacques Derrida, De la hospitalidad (1997)" },
+      { t: "Heredar nunca es una pasividad recibida; es siempre una tarea.", a: "Jacques Derrida, Espectros de Marx (1993)" },
+      { t: "Una habitación sin libros es como un cuerpo sin alma.", a: "Cicerón" },
+      { t: "Vivir es pensar.", a: "Cicerón, Tusculanas (c. 45 a. C.)" },
+      { t: "El no saber lo que ha sucedido antes de nosotros es ser siempre un niño.", a: "Cicerón, El orador (46 a. C.)" },
+      { t: "El extremo rigor del derecho es extrema injusticia.", a: "Cicerón, De los deberes (44 a. C.)" },
+      { t: "¡Oh tiempos, oh costumbres!", a: "Cicerón, Catilinarias (63 a. C.)" },
+      { t: "El rostro es el espejo del alma, y los ojos, sus intérpretes.", a: "Cicerón, El orador (46 a. C.)" },
+      { t: "No hay nada tan absurdo que no haya sido dicho por algún filósofo.", a: "Cicerón, De la adivinación (44 a. C.)" },
+      { t: "La amistad hace que la prosperidad sea más brillante, y aligera la adversidad dividiéndola y compartiéndola.", a: "Cicerón, De la amistad (44 a. C.)" },
+
+      { t: "Si te aflige algo externo, no es ese algo lo que te perturba, sino tu propio juicio sobre ello; y está en tu poder borrarlo ahora.", a: "Marco Aurelio, Meditaciones VIII, 47 (c. 175)" },
+      { t: "El alma se tiñe con el color de sus pensamientos.", a: "Marco Aurelio, Meditaciones V, 16 (c. 175)" },
+      { t: "Comienza la mañana diciéndote a ti mismo: hoy me encontraré con gente entrometida, ingrata, arrogante, deshonesta, celosa y agria. Y, sin embargo, son mis hermanos.", a: "Marco Aurelio, Meditaciones II, 1 (c. 175)" },
+      { t: "Lo que se interpone en el camino se convierte en el camino.", a: "Marco Aurelio, Meditaciones V, 20 (c. 175)" },
+      { t: "El mejor modo de vengarte de tus enemigos es no parecerte a ellos.", a: "Marco Aurelio, Meditaciones VI, 6 (c. 175)" },
+      { t: "Vives solamente ahora, en este momento fugaz. Todo lo demás o ya pasó o es incierto.", a: "Marco Aurelio, Meditaciones III, 10 (c. 175)" },
+      { t: "Acepta las cosas a las que el destino te ata, y ama a las personas con las que el destino te une, pero hazlo con todo tu corazón.", a: "Marco Aurelio, Meditaciones VI, 39 (c. 175)" },
+      { t: "Pronto habrás olvidado todas las cosas; y todas las cosas pronto te habrán olvidado a ti.", a: "Marco Aurelio, Meditaciones VII, 21 (c. 175)" },
+
+      { t: "Una vida no examinada no merece ser vivida.", a: "Sócrates (Apología, 399 a. C.)" },
+      { t: "Solo sé que no sé nada.", a: "Sócrates (atribución platónica)" },
+      { t: "Conócete a ti mismo.", a: "Sócrates (oráculo de Delfos)" },
+      { t: "El cuerpo es la cárcel del alma.", a: "Platón, Fedón (c. 380 a. C.)" },
+      { t: "Aprender no es otra cosa que recordar.", a: "Platón, Menón (c. 385 a. C.)" },
+      { t: "Los que filosofan rectamente se ejercitan en morir.", a: "Platón, Fedón (c. 380 a. C.)" },
+      { t: "El hombre es por naturaleza un animal político.", a: "Aristóteles, Política I (c. 335 a. C.)" },
+      { t: "La virtud es un término medio entre dos vicios, el uno por exceso y el otro por defecto.", a: "Aristóteles, Ética a Nicómaco II (c. 340 a. C.)" },
+      { t: "El amigo es otro yo.", a: "Aristóteles, Ética a Nicómaco IX (c. 340 a. C.)" },
+      { t: "Todos los hombres por naturaleza desean saber.", a: "Aristóteles, Metafísica I (c. 350 a. C.)" },
+      { t: "Pienso, luego existo.", a: "René Descartes, Discurso del método (1637)" },
+      { t: "Para examinar la verdad, es preciso, una vez en la vida, poner en duda todas las cosas en cuanto sea posible.", a: "René Descartes, Principios de la filosofía (1644)" },
+      { t: "El hombre es una caña, la más débil de la naturaleza; pero es una caña pensante.", a: "Blaise Pascal, Pensamientos, fr. 200 (1670)" },
+      { t: "Si Dios existe, lo ganamos todo; si no existe, no perdemos nada. Apuesta entonces sin titubear que existe.", a: "Blaise Pascal, Pensamientos, fr. 233 (1670)" },
+      { t: "Toda la desgracia de los hombres procede de una sola cosa: no saber estar tranquilo en una habitación.", a: "Blaise Pascal, Pensamientos, fr. 139 (1670)" },
+      { t: "La angustia es el vértigo de la libertad.", a: "Søren Kierkegaard, El concepto de la angustia (1844)" },
+      { t: "La verdad es subjetividad.", a: "Søren Kierkegaard, Postscriptum no científico (1846)" },
+      { t: "El mayor peligro, perderse a uno mismo, puede pasar en el mundo tan en silencio como si nada fuera.", a: "Søren Kierkegaard, La enfermedad mortal (1849)" },
+
+      { t: "Nos hiciste, Señor, para ti, y nuestro corazón está inquieto hasta que descanse en ti.", a: "San Agustín, Confesiones I, 1 (397-400)" },
+      { t: "Tarde te amé, hermosura tan antigua y tan nueva, tarde te amé. Tú estabas dentro de mí, y yo fuera, y por fuera te buscaba.", a: "San Agustín, Confesiones X, 27 (397-400)" },
+      { t: "¿Qué es, pues, el tiempo? Si nadie me lo pregunta, lo sé; pero si quiero explicárselo al que me lo pregunta, no lo sé.", a: "San Agustín, Confesiones XI, 14 (397-400)" },
+      { t: "Los hombres salen a admirar la altura de las montañas, las inmensas olas del mar, las anchurosas corrientes de los ríos, la vastedad del océano, los giros de las estrellas, y se olvidan de sí mismos.", a: "San Agustín, Confesiones X, 8 (397-400)" },
+      { t: "Dame castidad y continencia, Señor, pero no todavía.", a: "San Agustín, Confesiones VIII, 7 (397-400)" },
+      { t: "No salgas fuera, vuelve a ti mismo: en el hombre interior habita la verdad.", a: "San Agustín, De vera religione XXXIX, 72 (390)" },
+      { t: "Ama, y haz lo que quieras.", a: "San Agustín, Tratado sobre la Primera epístola de Juan VII, 8 (407)" },
+      { t: "La fe es creer lo que no se ve, y la recompensa de esta fe es ver lo que se cree.", a: "San Agustín, Sermón 43, 9 (c. 410)" },
+      { t: "Dos amores fundaron dos ciudades: el amor de sí mismo hasta el desprecio de Dios fundó la ciudad terrena; el amor de Dios hasta el desprecio de sí mismo fundó la ciudad celestial.", a: "San Agustín, La ciudad de Dios XIV, 28 (413-426)" },
+      { t: "El alma vive más allí donde ama que allí donde anima.", a: "San Agustín, Epístola 137 (412)" }
+    ];
+
+    (function () {
+      const quoteEl = document.getElementById('quote');
+      const authorEl = document.getElementById('author');
+      const dateEl = document.getElementById('date');
+      const cardEl = document.getElementById('card');
+      const hintEl = document.getElementById('hint');
+      const newBtn = document.getElementById('newQuote');
+      const copyBtn = document.getElementById('copyQuote');
+      const shareBtn = document.getElementById('shareQuote');
+
+      const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+      function dayOfYear(d) {
+        const start = new Date(d.getFullYear(), 0, 0);
+        const diff = d - start;
+        return Math.floor(diff / 86400000);
+      }
+
+      function quoteOfTheDay() {
+        const today = new Date();
+        const idx = (dayOfYear(today) + today.getFullYear()) % QUOTES.length;
+        return QUOTES[idx];
+      }
+
+      function formatDate(d) {
+        return `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+      }
+
+      function renderQuote(q, animate) {
+        if (animate) {
+          cardEl.classList.remove('swap');
+          void cardEl.offsetWidth;
+          cardEl.classList.add('swap');
+        }
+        quoteEl.textContent = q.t;
+        authorEl.textContent = q.a;
+      }
+
+      function showHint(text) {
+        hintEl.textContent = text;
+        hintEl.style.opacity = '1';
+        clearTimeout(showHint._t);
+        showHint._t = setTimeout(() => {
+          hintEl.style.opacity = '0';
+        }, 2200);
+      }
+
+      let current = quoteOfTheDay();
+      dateEl.textContent = formatDate(new Date());
+      renderQuote(current, false);
+
+      newBtn.addEventListener('click', () => {
+        let next;
+        do {
+          next = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+        } while (next.t === current.t && QUOTES.length > 1);
+        current = next;
+        renderQuote(current, true);
+      });
+
+      copyBtn.addEventListener('click', async () => {
+        const text = `"${current.t}" — ${current.a}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          showHint('Cita copiada al portapapeles');
+        } catch {
+          showHint('No se pudo copiar');
+        }
+      });
+
+      shareBtn.addEventListener('click', async () => {
+        const text = `"${current.t}" — ${current.a}`;
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: 'Cita del día para Giovanna', text });
+          } catch {}
+        } else {
+          try {
+            await navigator.clipboard.writeText(text);
+            showHint('Compartir no disponible, cita copiada');
+          } catch {
+            showHint('Compartir no disponible');
+          }
+        }
+      });
+
+      if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
