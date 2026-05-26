@@ -235,6 +235,110 @@
       margin-top: 8px;
     }
 
+    dialog.advisor-modal {
+      width: min(720px, calc(100vw - 24px));
+      max-height: calc(100vh - 48px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      background: #1a2332;
+      color: var(--ink);
+      padding: 0;
+      box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7);
+    }
+    dialog.advisor-modal::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+    }
+    .advisor-inner {
+      padding: 28px 28px 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+    .advisor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .advisor-subtitle {
+      font-size: 13px;
+      color: var(--ink-dim);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .key-banner {
+      background: rgba(212, 165, 116, 0.08);
+      border: 1px solid rgba(212, 165, 116, 0.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink-dim);
+    }
+    .key-banner strong { color: var(--ink); }
+    .key-banner a { color: var(--accent); text-decoration: underline; }
+    .key-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .key-row input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--ink);
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+    }
+    .key-status {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-top: 8px;
+    }
+    .key-status.ok { color: #6acf94; }
+    .response {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 40px;
+    }
+    .response strong { color: var(--accent); font-weight: 500; }
+    .response em { font-style: italic; color: var(--ink-dim); }
+    .response .thinking {
+      display: inline-block;
+      color: var(--ink-dim);
+      font-size: 13px;
+      font-style: italic;
+    }
+    .response .dots::after {
+      content: '';
+      animation: dots 1.4s infinite;
+    }
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+    .response-err {
+      background: rgba(244, 99, 99, 0.1);
+      border: 1px solid rgba(244, 99, 99, 0.3);
+      color: #f46363;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
     .controls {
       display: flex;
       gap: 12px;
@@ -311,10 +415,53 @@
 
     <footer class="controls">
       <button id="newQuote" class="btn">Otra cita</button>
+      <button id="consultBtn" class="btn btn-ghost">Consultar</button>
       <button id="addQuote" class="btn btn-ghost">+ Mía</button>
       <button id="copyQuote" class="btn btn-ghost">Copiar</button>
       <button id="shareQuote" class="btn btn-ghost">Compartir</button>
     </footer>
+
+    <dialog id="advisorModal" class="advisor-modal">
+      <div class="advisor-inner">
+        <div class="advisor-header">
+          <h2 class="modal-title">Consejero filosófico</h2>
+          <button type="button" id="advisorClose" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;">Cerrar</button>
+        </div>
+        <p class="advisor-subtitle">Describe un problema, una decisión o una situación que te ocupe. Te respondo desde la filosofía y las ciencias humanas: distintas perspectivas, sus tensiones, y un paso concreto que puedas dar.</p>
+
+        <div id="keyBanner" class="key-banner" hidden>
+          <strong>Configura tu clave API de Claude (una vez).</strong> Esta función consulta directamente a Claude desde tu navegador. Necesitas tu propia clave porque el coste corre por tu cuenta (~$0.10-0.20 por consulta).
+          <br><br>
+          <strong>Cómo obtenerla:</strong>
+          <ol style="margin: 8px 0 0 18px; padding: 0;">
+            <li>Ve a <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com/settings/keys</a></li>
+            <li>Crea cuenta (si no tienes) → "Create Key" → copia el valor (empieza con <code>sk-ant-...</code>)</li>
+            <li>Pégalo abajo. Se guarda <strong>solo en este navegador</strong> (localStorage); nunca sale de tu dispositivo.</li>
+          </ol>
+        </div>
+
+        <div class="modal-field">
+          <label for="apiKeyInput">Clave API (sk-ant-...)</label>
+          <div class="key-row">
+            <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+            <button type="button" id="keySave" class="btn">Guardar</button>
+            <button type="button" id="keyClear" class="btn btn-ghost" hidden>Borrar</button>
+          </div>
+          <p id="keyStatus" class="key-status"></p>
+        </div>
+
+        <div class="modal-field">
+          <label for="problemInput">Tu problema o situación</label>
+          <textarea id="problemInput" maxlength="3000" rows="5" placeholder="Ej: «Llevo tres meses dudando si dejar mi trabajo. Hay buenas razones para irme y otras para quedarme. ¿Cómo lo enfoco?»"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="consultSubmit" class="btn">Consultar</button>
+        </div>
+
+        <div id="response" class="response" hidden></div>
+      </div>
+    </dialog>
 
     <dialog id="addModal" class="add-modal">
       <form method="dialog" class="modal-inner" id="addForm">
@@ -765,6 +912,208 @@
         current = all[Math.floor(Math.random() * all.length)];
         renderQuote(current, true);
         showHint('Cita eliminada');
+      });
+
+      // -------- Philosophical Advisor (Claude API) --------
+      const consultBtn = document.getElementById('consultBtn');
+      const advisorModal = document.getElementById('advisorModal');
+      const advisorClose = document.getElementById('advisorClose');
+      const keyBanner = document.getElementById('keyBanner');
+      const apiKeyInput = document.getElementById('apiKeyInput');
+      const keySave = document.getElementById('keySave');
+      const keyClear = document.getElementById('keyClear');
+      const keyStatus = document.getElementById('keyStatus');
+      const problemInput = document.getElementById('problemInput');
+      const consultSubmit = document.getElementById('consultSubmit');
+      const responseEl = document.getElementById('response');
+
+      const API_KEY_STORAGE = 'cita-diaria.anthropic-api-key.v1';
+
+      const ADVISOR_SYSTEM_PROMPT = `Eres un consejero filosófico para una persona inteligente que te consulta sobre un problema, una decisión, o una situación de su vida. Tu trabajo es ayudarle a pensar mejor sobre lo que vive — no resolverle la vida, no animarle, no decirle qué debe sentir.
+
+Tu método para cada consulta:
+
+1. **Reformula** lo que entiendes del problema en 1-2 frases. Si lo planteado es ambiguo, di lo que falta para que la respuesta sea más fina.
+
+2. **Ofrece 2-3 perspectivas** desde tradiciones distintas (estoicismo, virtud aristotélica, existencialismo, pragmatismo, fenomenología, economía conductual, psicología analítica, etc.) sobre el problema concreto. Para cada una:
+   - Identifica al pensador o tradición.
+   - Explica qué diría sobre esta situación específica, no en abstracto.
+   - Sé concreto: cita al autor por la línea exacta o la idea precisa cuando ilumine.
+
+3. **Identifica las tensiones** entre esas perspectivas. La filosofía no es un buffet de respuestas; cada tradición pone en juego valores diferentes (libertad vs. compromiso, autenticidad vs. deber, prudencia vs. coraje, etc.). Mostrar esa tensión es más útil que una sola "respuesta correcta".
+
+4. **Un paso concreto y verificable** que la persona pueda dar esta semana — no consigna de autoayuda, sino algo específico que pueda hacer, preguntar, observar o probar.
+
+Estilo:
+- Español castellano, claro, sin condescendencia, sin emojis, sin lugares comunes de coaching.
+- Tono adulto: tratas a la persona como capaz de pensar.
+- No prometas más de lo que la filosofía puede dar: ayuda a ver con claridad, no a "sanar" ni a "elegir bien" en sentido garantizado.
+- No moralices. No supongas valores que la persona no expresó.
+- Si el problema indica claramente necesidad de ayuda profesional (terapia, médico, abogado, crisis aguda), dilo explícitamente y con respeto — eso no es renunciar a tu trabajo, es delimitarlo.
+
+Extensión: 350-650 palabras. No más. La densidad importa más que el volumen.`;
+
+      function refreshKeyUi() {
+        const stored = localStorage.getItem(API_KEY_STORAGE) || '';
+        if (stored) {
+          keyBanner.hidden = true;
+          apiKeyInput.value = '••••••••••••' + stored.slice(-6);
+          apiKeyInput.dataset.masked = '1';
+          keyClear.hidden = false;
+          keyStatus.textContent = '✓ Clave guardada en este navegador';
+          keyStatus.className = 'key-status ok';
+        } else {
+          keyBanner.hidden = false;
+          apiKeyInput.value = '';
+          apiKeyInput.dataset.masked = '';
+          keyClear.hidden = true;
+          keyStatus.textContent = 'No hay clave guardada';
+          keyStatus.className = 'key-status';
+        }
+      }
+
+      apiKeyInput.addEventListener('focus', () => {
+        if (apiKeyInput.dataset.masked) {
+          apiKeyInput.value = '';
+          apiKeyInput.dataset.masked = '';
+        }
+      });
+
+      keySave.addEventListener('click', () => {
+        const val = apiKeyInput.value.trim();
+        if (!val.startsWith('sk-ant-')) {
+          keyStatus.textContent = 'La clave debe empezar con sk-ant-';
+          keyStatus.className = 'key-status';
+          return;
+        }
+        localStorage.setItem(API_KEY_STORAGE, val);
+        refreshKeyUi();
+      });
+
+      keyClear.addEventListener('click', () => {
+        if (!confirm('¿Eliminar la clave API de este navegador?')) return;
+        localStorage.removeItem(API_KEY_STORAGE);
+        refreshKeyUi();
+      });
+
+      consultBtn.addEventListener('click', () => {
+        refreshKeyUi();
+        responseEl.hidden = true;
+        responseEl.innerHTML = '';
+        problemInput.value = '';
+        if (typeof advisorModal.showModal === 'function') {
+          advisorModal.showModal();
+        } else {
+          advisorModal.setAttribute('open', '');
+        }
+        setTimeout(() => problemInput.focus(), 50);
+      });
+
+      advisorClose.addEventListener('click', () => advisorModal.close());
+
+      function renderMarkdownish(text) {
+        // Light markdown: **bold**, *italic*, paragraphs, numbered lists kept as-is
+        let html = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+          .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
+        return html;
+      }
+
+      consultSubmit.addEventListener('click', async () => {
+        const key = localStorage.getItem(API_KEY_STORAGE);
+        if (!key) {
+          keyBanner.hidden = false;
+          keyStatus.textContent = 'Configura tu clave API primero';
+          keyStatus.className = 'key-status';
+          apiKeyInput.focus();
+          return;
+        }
+        const problem = problemInput.value.trim();
+        if (problem.length < 10) {
+          responseEl.hidden = false;
+          responseEl.innerHTML = '<div class="response-err">Escribe al menos una frase describiendo tu situación.</div>';
+          return;
+        }
+
+        consultSubmit.disabled = true;
+        consultSubmit.textContent = 'Pensando…';
+        responseEl.hidden = false;
+        responseEl.innerHTML = '<span class="thinking dots">Reflexionando</span>';
+
+        let acc = '';
+        try {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': key,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+              model: 'claude-opus-4-7',
+              max_tokens: 4096,
+              stream: true,
+              thinking: { type: 'adaptive' },
+              output_config: { effort: 'high' },
+              system: [
+                { type: 'text', text: ADVISOR_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }
+              ],
+              messages: [{ role: 'user', content: problem }]
+            })
+          });
+
+          if (!res.ok) {
+            let msg = `Error ${res.status}`;
+            try {
+              const e = await res.json();
+              msg = e.error?.message || msg;
+              if (res.status === 401) msg = 'Clave API inválida. Comprueba que la copiaste entera.';
+              if (res.status === 429) msg = 'Has superado tu límite de uso. Espera un momento o revisa tu cuenta de Anthropic.';
+            } catch {}
+            responseEl.innerHTML = `<div class="response-err">${msg}</div>`;
+            return;
+          }
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let started = false;
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const dataStr = line.slice(6).trim();
+              if (!dataStr) continue;
+              try {
+                const event = JSON.parse(dataStr);
+                if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+                  if (!started) {
+                    responseEl.innerHTML = '';
+                    started = true;
+                  }
+                  acc += event.delta.text;
+                  responseEl.innerHTML = renderMarkdownish(acc);
+                  responseEl.scrollTop = responseEl.scrollHeight;
+                }
+              } catch {}
+            }
+          }
+        } catch (err) {
+          responseEl.innerHTML = `<div class="response-err">No se pudo contactar a Claude: ${err.message || err}</div>`;
+        } finally {
+          consultSubmit.disabled = false;
+          consultSubmit.textContent = 'Consultar';
+        }
       });
 
       if ('serviceWorker' in navigator && location.protocol !== 'file:') {
