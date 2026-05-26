@@ -502,37 +502,25 @@
         <p class="advisor-subtitle">Describe un problema, una decisión o una situación que te ocupe. Te respondo desde la filosofía y las ciencias humanas: distintas perspectivas, sus tensiones, y un paso concreto que puedas dar.</p>
 
         <div id="keyBanner" class="key-banner" hidden>
-          <strong>Para usarme necesitas una clave API de Claude.</strong> Es gratis crearla y se guarda solo en tu navegador. Cada consulta cuesta unos pocos céntimos (entre $0.008 y $0.04 según el modelo), pagados directamente a Anthropic con tu cuenta.
+          <strong>Necesitas una clave gratuita de Google AI.</strong> Sin tarjeta de crédito. 1500 consultas/día gratis por usuario. Se guarda solo en tu navegador.
           <br><br>
-          <strong>Tres pasos, 2 minutos:</strong>
+          <strong>Tres pasos, 60 segundos:</strong>
           <ol style="margin: 8px 0 0 18px; padding: 0;">
-            <li>Abre el panel de Anthropic con el botón de abajo y crea tu cuenta (gratis).</li>
-            <li>Pulsa <em>"Create Key"</em> → cópiala (empieza con <code>sk-ant-...</code>).</li>
+            <li>Abre Google AI Studio con el botón de abajo (entra con tu cuenta de Google).</li>
+            <li>Pulsa <em>"Create API key"</em> → cópiala (empieza con <code>AIza...</code>).</li>
             <li>Pégala en el campo de abajo y pulsa Guardar.</li>
           </ol>
-          <a class="key-cta-btn" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Abrir Anthropic Console ↗</a>
+          <a class="key-cta-btn" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Abrir Google AI Studio ↗</a>
         </div>
 
         <div class="modal-field">
-          <label for="apiKeyInput">Clave API (sk-ant-...)</label>
+          <label for="apiKeyInput">Clave API (AIza...)</label>
           <div class="key-row">
-            <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+            <input id="apiKeyInput" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
             <button type="button" id="keySave" class="btn">Guardar</button>
             <button type="button" id="keyClear" class="btn btn-ghost" hidden>Borrar</button>
           </div>
           <p id="keyStatus" class="key-status"></p>
-        </div>
-
-        <p class="examples-label">Modelo</p>
-        <div class="model-selector">
-          <div class="model-option active" id="modelOpus" data-model="claude-opus-4-7">
-            <div class="model-option-name">Opus 4.7</div>
-            <div class="model-option-desc">Más profundo · ~$0.04/consulta</div>
-          </div>
-          <div class="model-option" id="modelHaiku" data-model="claude-haiku-4-5">
-            <div class="model-option-name">Haiku 4.5</div>
-            <div class="model-option-desc">Más rápido · ~$0.008/consulta</div>
-          </div>
         </div>
 
         <div class="modal-field">
@@ -1007,7 +995,7 @@
         showHint('Cita eliminada');
       });
 
-      // -------- Philosophical Advisor (Claude API) --------
+      // -------- Philosophical Advisor (Google Gemini API, BYOK free tier) --------
       const consultBtn = document.getElementById('consultBtn');
       const advisorModal = document.getElementById('advisorModal');
       const advisorClose = document.getElementById('advisorClose');
@@ -1020,25 +1008,10 @@
       const consultSubmit = document.getElementById('consultSubmit');
       const responseEl = document.getElementById('response');
 
-      const API_KEY_STORAGE = 'cita-diaria.anthropic-api-key.v1';
-      const MODEL_STORAGE = 'cita-diaria.advisor-model.v1';
-      const modelOpts = document.querySelectorAll('.model-option');
+      const API_KEY_STORAGE = 'cita-diaria.gemini-api-key.v1';
+      const GEMINI_MODEL = 'gemini-2.5-flash';
       const exampleChips = document.querySelectorAll('.example-chip');
 
-      function getSelectedModel() {
-        const stored = localStorage.getItem(MODEL_STORAGE);
-        if (stored === 'claude-haiku-4-5' || stored === 'claude-opus-4-7') return stored;
-        return 'claude-opus-4-7';
-      }
-      function setSelectedModel(modelId) {
-        localStorage.setItem(MODEL_STORAGE, modelId);
-        modelOpts.forEach(opt => {
-          opt.classList.toggle('active', opt.dataset.model === modelId);
-        });
-      }
-      modelOpts.forEach(opt => {
-        opt.addEventListener('click', () => setSelectedModel(opt.dataset.model));
-      });
       exampleChips.forEach(chip => {
         chip.addEventListener('click', () => {
           problemInput.value = chip.dataset.ex;
@@ -1098,8 +1071,8 @@ Extensión: 350-650 palabras. No más. La densidad importa más que el volumen.`
 
       keySave.addEventListener('click', () => {
         const val = apiKeyInput.value.trim();
-        if (!val.startsWith('sk-ant-')) {
-          keyStatus.textContent = 'La clave debe empezar con sk-ant-';
+        if (!val.startsWith('AIza')) {
+          keyStatus.textContent = 'La clave debe empezar con AIza';
           keyStatus.className = 'key-status';
           return;
         }
@@ -1115,7 +1088,6 @@ Extensión: 350-650 palabras. No más. La densidad importa más que el volumen.`
 
       consultBtn.addEventListener('click', () => {
         refreshKeyUi();
-        setSelectedModel(getSelectedModel());
         responseEl.hidden = true;
         responseEl.innerHTML = '';
         problemInput.value = '';
@@ -1163,32 +1135,15 @@ Extensión: 350-650 palabras. No más. La densidad importa más que el volumen.`
 
         let acc = '';
         try {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`;
+          const res = await fetch(url, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': key,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify((() => {
-              const model = getSelectedModel();
-              const body = {
-                model,
-                max_tokens: 4096,
-                stream: true,
-                system: [
-                  { type: 'text', text: ADVISOR_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }
-                ],
-                messages: [{ role: 'user', content: problem }]
-              };
-              // Adaptive thinking + effort only on Opus 4.7 (Haiku 4.5 doesn't support effort)
-              if (model === 'claude-opus-4-7') {
-                body.thinking = { type: 'adaptive' };
-                body.output_config = { effort: 'high' };
-              }
-              return body;
-            })())
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: ADVISOR_SYSTEM_PROMPT }] },
+              contents: [{ role: 'user', parts: [{ text: problem }] }],
+              generationConfig: { maxOutputTokens: 4096, temperature: 0.8 }
+            })
           });
 
           if (!res.ok) {
@@ -1196,8 +1151,13 @@ Extensión: 350-650 palabras. No más. La densidad importa más que el volumen.`
             try {
               const e = await res.json();
               msg = e.error?.message || msg;
-              if (res.status === 401) msg = 'Clave API inválida. Comprueba que la copiaste entera.';
-              if (res.status === 429) msg = 'Has superado tu límite de uso. Espera un momento o revisa tu cuenta de Anthropic.';
+              if (res.status === 400 && /API key not valid/i.test(msg)) {
+                msg = 'Clave API inválida. Comprueba que la copiaste entera y que está activa en Google AI Studio.';
+              } else if (res.status === 401 || res.status === 403) {
+                msg = 'Clave rechazada por Google. Verifica que la clave está activa y tiene permiso para Gemini.';
+              } else if (res.status === 429) {
+                msg = 'Has superado el límite gratuito de hoy (1500 consultas/día). Espera al reset diario o crea una nueva clave.';
+              }
             } catch {}
             responseEl.innerHTML = `<div class="response-err">${msg}</div>`;
             return;
@@ -1221,20 +1181,23 @@ Extensión: 350-650 palabras. No más. La densidad importa más que el volumen.`
               if (!dataStr) continue;
               try {
                 const event = JSON.parse(dataStr);
-                if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-                  if (!started) {
-                    responseEl.innerHTML = '';
-                    started = true;
+                const parts = event.candidates?.[0]?.content?.parts || [];
+                for (const part of parts) {
+                  if (typeof part.text === 'string' && part.text.length) {
+                    if (!started) {
+                      responseEl.innerHTML = '';
+                      started = true;
+                    }
+                    acc += part.text;
+                    responseEl.innerHTML = renderMarkdownish(acc);
+                    responseEl.scrollTop = responseEl.scrollHeight;
                   }
-                  acc += event.delta.text;
-                  responseEl.innerHTML = renderMarkdownish(acc);
-                  responseEl.scrollTop = responseEl.scrollHeight;
                 }
               } catch {}
             }
           }
         } catch (err) {
-          responseEl.innerHTML = `<div class="response-err">No se pudo contactar a Claude: ${err.message || err}</div>`;
+          responseEl.innerHTML = `<div class="response-err">No se pudo contactar a Gemini: ${err.message || err}</div>`;
         } finally {
           consultSubmit.disabled = false;
           consultSubmit.textContent = 'Consultar';
