@@ -1,4 +1,4 @@
-const CACHE = 'cita-diaria-v12';
+const CACHE = 'cita-diaria-v13';
 const ASSETS = [
   './',
   './index.html',

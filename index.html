@@ -301,17 +301,42 @@
 
     <section class="card" id="card">
       <div class="quote-mark">&ldquo;</div>
+      <span class="personal-badge" id="personalBadge" hidden>Personal</span>
       <blockquote class="quote" id="quote">Cargando...</blockquote>
       <p class="author" id="author"></p>
       <button id="toggleMeaning" class="meaning-toggle" hidden>Ver significado</button>
+      <button id="deleteQuote" class="delete-btn" hidden>Eliminar</button>
       <div class="meaning" id="meaning" hidden></div>
     </section>
 
     <footer class="controls">
       <button id="newQuote" class="btn">Otra cita</button>
+      <button id="addQuote" class="btn btn-ghost">+ Mía</button>
       <button id="copyQuote" class="btn btn-ghost">Copiar</button>
       <button id="shareQuote" class="btn btn-ghost">Compartir</button>
     </footer>
+
+    <dialog id="addModal" class="add-modal">
+      <form method="dialog" class="modal-inner" id="addForm">
+        <h2 class="modal-title">Añadir cita propia</h2>
+        <div class="modal-field">
+          <label for="addText">Cita</label>
+          <textarea id="addText" required maxlength="1200" placeholder="Escribe la cita o reflexión…"></textarea>
+        </div>
+        <div class="modal-field">
+          <label for="addAuthor">Autor (opcional)</label>
+          <input id="addAuthor" type="text" maxlength="200" placeholder="Anónimo">
+        </div>
+        <div class="modal-field">
+          <label for="addMeaning">Significado / por qué te importa (opcional)</label>
+          <textarea id="addMeaning" maxlength="1200" placeholder="¿Qué quieres recordar al releerla?"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="addCancel" class="btn btn-ghost">Cancelar</button>
+          <button type="submit" id="addSave" class="btn">Guardar</button>
+        </div>
+      </form>
+    </dialog>
 
     <p class="hint" id="hint"></p>
   </main>
@@ -560,6 +585,28 @@
       const shareBtn = document.getElementById('shareQuote');
       const toggleMeaningBtn = document.getElementById('toggleMeaning');
       const meaningEl = document.getElementById('meaning');
+      const addBtn = document.getElementById('addQuote');
+      const deleteBtn = document.getElementById('deleteQuote');
+      const badgeEl = document.getElementById('personalBadge');
+      const modal = document.getElementById('addModal');
+      const form = document.getElementById('addForm');
+      const inputText = document.getElementById('addText');
+      const inputAuthor = document.getElementById('addAuthor');
+      const inputMeaning = document.getElementById('addMeaning');
+      const cancelBtn = document.getElementById('addCancel');
+
+      const STORAGE_KEY = 'cita-diaria.personal-quotes.v1';
+      function loadPersonal() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        } catch { return []; }
+      }
+      function savePersonal(arr) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      }
+      function pool() {
+        return [...QUOTES, ...loadPersonal()];
+      }
 
       const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
       const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -572,8 +619,9 @@
 
       function quoteOfTheDay() {
         const today = new Date();
-        const idx = (dayOfYear(today) + today.getFullYear()) % QUOTES.length;
-        return QUOTES[idx];
+        const all = pool();
+        const idx = (dayOfYear(today) + today.getFullYear()) % all.length;
+        return all[idx];
       }
 
       function formatDate(d) {
@@ -587,7 +635,7 @@
           cardEl.classList.add('swap');
         }
         quoteEl.textContent = q.t;
-        authorEl.textContent = q.a;
+        authorEl.textContent = q.a || 'Anónimo';
         meaningEl.hidden = true;
         meaningEl.innerHTML = '';
         if (q.e) {
@@ -595,6 +643,13 @@
           toggleMeaningBtn.textContent = 'Ver significado';
         } else {
           toggleMeaningBtn.hidden = true;
+        }
+        if (q.personal) {
+          badgeEl.hidden = false;
+          deleteBtn.hidden = false;
+        } else {
+          badgeEl.hidden = true;
+          deleteBtn.hidden = true;
         }
       }
 
@@ -625,10 +680,11 @@
       renderQuote(current, false);
 
       newBtn.addEventListener('click', () => {
+        const all = pool();
         let next;
         do {
-          next = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-        } while (next.t === current.t && QUOTES.length > 1);
+          next = all[Math.floor(Math.random() * all.length)];
+        } while (next.t === current.t && all.length > 1);
         current = next;
         renderQuote(current, true);
       });
@@ -657,6 +713,58 @@
             showHint('Compartir no disponible');
           }
         }
+      });
+
+      addBtn.addEventListener('click', () => {
+        form.reset();
+        if (typeof modal.showModal === 'function') {
+          modal.showModal();
+        } else {
+          modal.setAttribute('open', '');
+        }
+        inputText.focus();
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        modal.close();
+      });
+
+      modal.addEventListener('click', (e) => {
+        const rect = modal.getBoundingClientRect();
+        if (e.target === modal && (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom)) {
+          modal.close();
+        }
+      });
+
+      form.addEventListener('submit', (e) => {
+        const text = inputText.value.trim();
+        if (!text) return;
+        const author = inputAuthor.value.trim() || 'Anónimo';
+        const meaning = inputMeaning.value.trim();
+        const entry = {
+          id: 'p' + Date.now() + Math.random().toString(36).slice(2, 6),
+          t: text,
+          a: author,
+          personal: true
+        };
+        if (meaning) entry.e = meaning;
+        const list = loadPersonal();
+        list.push(entry);
+        savePersonal(list);
+        current = entry;
+        renderQuote(current, true);
+        showHint('Cita guardada');
+      });
+
+      deleteBtn.addEventListener('click', () => {
+        if (!current || !current.personal) return;
+        if (!confirm('¿Eliminar esta cita personal?')) return;
+        const list = loadPersonal().filter(q => q.id !== current.id);
+        savePersonal(list);
+        const all = pool();
+        current = all[Math.floor(Math.random() * all.length)];
+        renderQuote(current, true);
+        showHint('Cita eliminada');
       });
 
       if ('serviceWorker' in navigator && location.protocol !== 'file:') {
