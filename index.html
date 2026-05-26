@@ -115,6 +115,37 @@
       text-align: right;
     }
     .author::before { content: '— '; }
+    .meaning-toggle {
+      display: inline-block;
+      margin-top: 20px;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--ink-dim);
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .meaning-toggle:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .meaning {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink-dim);
+      font-style: normal;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .meaning strong { color: var(--ink); font-weight: 500; }
     .controls {
       display: flex;
       gap: 12px;
@@ -183,6 +214,8 @@
       <div class="quote-mark">&ldquo;</div>
       <blockquote class="quote" id="quote">Cargando...</blockquote>
       <p class="author" id="author"></p>
+      <button id="toggleMeaning" class="meaning-toggle" hidden>Ver significado</button>
+      <div class="meaning" id="meaning" hidden></div>
     </section>
 
     <footer class="controls">
@@ -196,34 +229,34 @@
 
   <script>
     const QUOTES = [
-      { t: "El hombre es la medida de todas las cosas.", a: "Protágoras" },
-      { t: "El asombro es el principio de la filosofía.", a: "Platón" },
-      { t: "Podemos perdonar a un niño que tiene miedo a la oscuridad; la verdadera tragedia es cuando los hombres tienen miedo a la luz.", a: "Platón" },
-      { t: "Somos lo que hacemos repetidamente. La excelencia, entonces, no es un acto, sino un hábito.", a: "Aristóteles" },
-      { t: "No podemos bañarnos dos veces en el mismo río.", a: "Heráclito" },
-      { t: "Dios ha muerto. Dios sigue muerto. Y nosotros lo hemos matado.", a: "Friedrich Nietzsche" },
-      { t: "Aquel que tiene un porqué para vivir, puede soportar casi cualquier cómo.", a: "Friedrich Nietzsche" },
-      { t: "Quien lucha con monstruos debe cuidarse de no convertirse a su vez en monstruo.", a: "Friedrich Nietzsche" },
-      { t: "No hay hechos, solo interpretaciones.", a: "Friedrich Nietzsche" },
-      { t: "El hombre está condenado a ser libre.", a: "Jean-Paul Sartre" },
-      { t: "El infierno son los otros.", a: "Jean-Paul Sartre" },
+      { t: "El hombre es la medida de todas las cosas.", a: "Protágoras", e: "La verdad y el valor no son absolutos: dependen del punto de vista humano que los formula. <strong>En la vida:</strong> antes de imponer tu opinión como verdad universal, pregúntate desde qué experiencia la pronuncias — y reconoce que el otro habla desde la suya." },
+      { t: "El asombro es el principio de la filosofía.", a: "Platón", e: "Filosofar empieza cuando algo cotidiano deja de parecer obvio. <strong>En la vida:</strong> conserva la capacidad de extrañarte ante lo que todos dan por sentado — un atardecer, el hecho de existir, la rutina familiar. Ahí nacen las preguntas que importan." },
+      { t: "Podemos perdonar a un niño que tiene miedo a la oscuridad; la verdadera tragedia es cuando los hombres tienen miedo a la luz.", a: "Platón", e: "La ignorancia inocente del niño es perdonable; la huida deliberada del conocimiento en el adulto, no. <strong>En la vida:</strong> rechazar pensar, informarse o cuestionarse no es neutralidad — es complicidad con lo que te conviene no saber." },
+      { t: "Somos lo que hacemos repetidamente. La excelencia, entonces, no es un acto, sino un hábito.", a: "Aristóteles", e: "El carácter se forma por repetición, no por gestos heroicos aislados. <strong>En la vida:</strong> tu rutina diaria —lo que haces sin pensar— revela quién eres más que tus declaraciones de intención. Para cambiar de carácter hay que cambiar de hábitos, no de discursos." },
+      { t: "No podemos bañarnos dos veces en el mismo río.", a: "Heráclito", e: "Tanto el río como tú han cambiado entre baño y baño: ningún instante se repite. <strong>En la vida:</strong> deja de aferrarte a versiones congeladas de las personas o las situaciones. Lo que regresa nunca es exactamente lo mismo que se fue — ni siquiera tú." },
+      { t: "Dios ha muerto. Dios sigue muerto. Y nosotros lo hemos matado.", a: "Friedrich Nietzsche", e: "No es una proclamación atea sino un diagnóstico cultural: las grandes certezas que daban sentido (religión, tradición, progreso) han perdido su autoridad. <strong>En la vida:</strong> heredamos la libertad de crear nuestros valores, pero también la responsabilidad de sostenerlos sin un orden cósmico que los garantice." },
+      { t: "Aquel que tiene un porqué para vivir, puede soportar casi cualquier cómo.", a: "Friedrich Nietzsche", e: "El sufrimiento es tolerable cuando tiene sentido; insoportable cuando es absurdo. <strong>En la vida:</strong> antes de pelear contra la dificultad de tus circunstancias, pregúntate si tienes claro tu para qué. Sin propósito, el más leve obstáculo agota; con él, casi nada doblega." },
+      { t: "Quien lucha con monstruos debe cuidarse de no convertirse a su vez en monstruo.", a: "Friedrich Nietzsche", e: "Combatir el mal con sus mismas armas es la forma más eficaz de reproducirlo. <strong>En la vida:</strong> ten cuidado con los medios que usas contra lo que detestas — el odio justificado tiende a transformarte en aquello que odias. Mira a quien has llegado a parecerte tras años de pelea." },
+      { t: "No hay hechos, solo interpretaciones.", a: "Friedrich Nietzsche", e: "Ningún dato llega puro a la mente: siempre lo recibe un marco que lo organiza, lo jerarquiza, lo carga de sentido. <strong>En la vida:</strong> cuando alguien dice «los hechos son los hechos», pregúntate qué interpretación está naturalizando como si fuera neutra." },
+      { t: "El hombre está condenado a ser libre.", a: "Jean-Paul Sartre", e: "No podemos no elegir: incluso no decidir es una decisión. La libertad no es un regalo sino una carga ineludible. <strong>En la vida:</strong> no puedes culpar a las circunstancias, a tu pasado o a otros por lo que haces hoy — cada acto es tuyo, incluyendo el de quedarte quieto." },
+      { t: "El infierno son los otros.", a: "Jean-Paul Sartre", e: "No es que los otros sean malos: es que su mirada nos cosifica, nos congela en una imagen que no controlamos. <strong>En la vida:</strong> sufres cuando vives pendiente de cómo te ven los demás. La mirada ajena puede ser cárcel, pero también la única forma de saber quién eres. El equilibrio está en no dejar que decida por ti." },
       { t: "Comencé entonces a comprender que el ser humano es el animal que cuenta historias.", a: "Jean-Paul Sartre" },
-      { t: "Hay que imaginar a Sísifo dichoso.", a: "Albert Camus" },
-      { t: "La vida solo puede ser comprendida mirando hacia atrás, pero ha de ser vivida mirando hacia adelante.", a: "Søren Kierkegaard" },
-      { t: "Atrévete a saber.", a: "Immanuel Kant" },
-      { t: "Obra de tal modo que uses la humanidad siempre como un fin, nunca como un medio.", a: "Immanuel Kant" },
+      { t: "Hay que imaginar a Sísifo dichoso.", a: "Albert Camus", e: "El castigo de Sísifo —empujar la roca cuesta arriba para siempre— es metáfora de la vida absurda. Camus dice: incluso sin sentido cósmico, hay dignidad en aceptar la tarea y entregarse a ella. <strong>En la vida:</strong> la felicidad no exige que el mundo tenga sentido — basta con asumir tu roca y empujarla con plena conciencia." },
+      { t: "La vida solo puede ser comprendida mirando hacia atrás, pero ha de ser vivida mirando hacia adelante.", a: "Søren Kierkegaard", e: "El sentido de lo que vivimos solo se ordena cuando ya pasó; pero hay que decidir y actuar antes de tener esa claridad. <strong>En la vida:</strong> esperar a entender antes de decidir es una excusa para no vivir. Avanza con la información imperfecta que tienes ahora; la comprensión llega después." },
+      { t: "Atrévete a saber.", a: "Immanuel Kant", e: "Sapere aude — divisa de la Ilustración. Pensar por uno mismo requiere coraje, porque es más cómodo dejar que otros (la autoridad, la tradición, la opinión común) piensen por ti. <strong>En la vida:</strong> la pereza intelectual no es inocente; es una forma de cesión voluntaria de tu libertad." },
+      { t: "Obra de tal modo que uses la humanidad siempre como un fin, nunca como un medio.", a: "Immanuel Kant", e: "Cada persona tiene dignidad intrínseca: no se la puede instrumentalizar para fines ajenos. <strong>En la vida:</strong> antes de pedirle algo a alguien, pregúntate si lo tratas como persona o como herramienta. La diferencia entre amor y manipulación, entre cooperación y explotación, está en esa frontera." },
       { t: "La libertad consiste en hacer todo lo que las leyes permiten.", a: "Montesquieu" },
-      { t: "El hombre nace libre, y en todas partes se encuentra encadenado.", a: "Jean-Jacques Rousseau" },
+      { t: "El hombre nace libre, y en todas partes se encuentra encadenado.", a: "Jean-Jacques Rousseau", e: "Las cadenas no son naturales: las pone la sociedad —sus normas, jerarquías, expectativas, propiedades. <strong>En la vida:</strong> muchos límites que aceptas como inevitables son convenciones que alguien diseñó. Pregúntate cuáles de tus cadenas son reales y cuáles te las dejaron puestas porque nunca las miraste de frente." },
       { t: "Para conocer al hombre, basta estudiarse a uno mismo; para conocer a los hombres, hay que ir entre ellos.", a: "Jean-Jacques Rousseau" },
-      { t: "Toda nuestra dignidad consiste en el pensamiento.", a: "Blaise Pascal" },
-      { t: "Mientras esperamos vivir, la vida pasa.", a: "Séneca" },
-      { t: "Quien no ha conocido la adversidad no se conoce a sí mismo.", a: "Séneca" },
-      { t: "Las personas felices recuerdan el pasado con gratitud, se regocijan en el presente y se enfrentan al futuro sin miedo.", a: "Epicuro" },
-      { t: "La muerte no es nada para nosotros, ya que cuando somos, la muerte no está, y cuando la muerte está, ya no somos nosotros.", a: "Epicuro" },
-      { t: "Solo es útil el conocimiento que nos hace mejores.", a: "Sócrates" },
+      { t: "Toda nuestra dignidad consiste en el pensamiento.", a: "Blaise Pascal", e: "El ser humano es físicamente frágil, pero su capacidad de reflexión lo eleva: sabe que va a morir, y eso ya lo distingue. <strong>En la vida:</strong> tu valor no está en lo que posees ni en lo que produces, sino en tu capacidad de detenerte a pensar lo que vives. No la atrofies." },
+      { t: "Mientras esperamos vivir, la vida pasa.", a: "Séneca", e: "Pasamos años posponiéndonos para «cuando termine el proyecto», «cuando los hijos crezcan», «cuando me jubile» — y entre tanto, la vida real ya transcurrió. <strong>En la vida:</strong> el momento que esperas no llegará nunca exactamente como lo imaginas. Vive el plazo intermedio como si fuera el destino, porque lo es." },
+      { t: "Quien no ha conocido la adversidad no se conoce a sí mismo.", a: "Séneca", e: "En la comodidad todos parecemos templados; solo la dificultad muestra de qué estamos hechos. <strong>En la vida:</strong> no temas las crisis tanto: son los espejos más fiables que tendrás. Lo que descubras de ti bajo presión es información que ninguna situación fácil te habría dado." },
+      { t: "Las personas felices recuerdan el pasado con gratitud, se regocijan en el presente y se enfrentan al futuro sin miedo.", a: "Epicuro", e: "Tres tiempos, tres actitudes: gratitud por lo que fue, disfrute de lo que hay, serenidad sobre lo que vendrá. <strong>En la vida:</strong> revisa cuál de los tres se te ha desordenado. Resentimiento con el pasado, ansiedad por el futuro o desconexión del presente son las tres formas más comunes de no estar." },
+      { t: "La muerte no es nada para nosotros, ya que cuando somos, la muerte no está, y cuando la muerte está, ya no somos nosotros.", a: "Epicuro", e: "Tememos a la muerte como si fuéramos a vivirla, pero por definición nunca coincidiremos con ella: o estamos o ya no estamos para sufrirla. <strong>En la vida:</strong> mucho del miedo a morir es miedo proyectado de algo que jamás experimentarás. Lo que sí experimentas es el tiempo que te queda — gástalo." },
+      { t: "Solo es útil el conocimiento que nos hace mejores.", a: "Sócrates", e: "Saber por saber no basta: para Sócrates, conocer es un acto moral, no acumulativo. <strong>En la vida:</strong> pregúntate qué te hace mejor lo que aprendes hoy. Si la respuesta es «nada, solo me hace más rápido produciendo lo mismo», es información, no conocimiento." },
       { t: "Lo poco que he aprendido carece de valor, comparado con lo que ignoro y no desespero en aprender.", a: "René Descartes" },
-      { t: "Entre estímulo y respuesta hay un espacio. En ese espacio está nuestro poder de elegir nuestra respuesta.", a: "Viktor Frankl" },
-      { t: "Cuando ya no somos capaces de cambiar una situación, nos encontramos con el desafío de cambiarnos a nosotros mismos.", a: "Viktor Frankl" },
+      { t: "Entre estímulo y respuesta hay un espacio. En ese espacio está nuestro poder de elegir nuestra respuesta.", a: "Viktor Frankl", e: "Frankl escribió esto tras sobrevivir a los campos de concentración: incluso allí, lo último que les pudieron quitar era la elección de cómo responder. <strong>En la vida:</strong> reacciona menos, responde más. Ese instante de pausa entre lo que te pasa y lo que haces es la única libertad que nadie te puede arrebatar." },
+      { t: "Cuando ya no somos capaces de cambiar una situación, nos encontramos con el desafío de cambiarnos a nosotros mismos.", a: "Viktor Frankl", e: "Hay situaciones irreversibles —duelos, enfermedades, decisiones ya tomadas. Lo que no puede modificarse afuera se modifica adentro. <strong>En la vida:</strong> cuando ya no puedes cambiar los hechos, te queda cambiar la actitud — y eso, lejos de ser un consuelo menor, es el último gesto realmente libre." },
       { t: "La realidad es aquello que, cuando dejas de creer en ello, no desaparece.", a: "Philip K. Dick" },
       { t: "El lector vive mil vidas antes de morir; el hombre que nunca lee vive solo una.", a: "George R. R. Martin" },
       { t: "Un libro debe ser un hacha que rompa el mar helado dentro de nosotros.", a: "Franz Kafka" },
@@ -238,8 +271,8 @@
       { t: "La libertad, Sancho, es uno de los más preciosos dones que a los hombres dieron los cielos.", a: "Miguel de Cervantes" },
       { t: "Los que sueñan de día son conscientes de muchas cosas que escapan a los que sueñan solo de noche.", a: "Edgar Allan Poe" },
       { t: "La filosofía es una batalla contra el embrujamiento de nuestra inteligencia por medio del lenguaje.", a: "Ludwig Wittgenstein" },
-      { t: "Los límites de mi lenguaje son los límites de mi mundo.", a: "Ludwig Wittgenstein" },
-      { t: "De lo que no se puede hablar, hay que callar.", a: "Ludwig Wittgenstein" },
+      { t: "Los límites de mi lenguaje son los límites de mi mundo.", a: "Ludwig Wittgenstein", e: "No puedes pensar lo que no puedes decir. Aprender una palabra nueva no es solo etiquetar algo: es abrir una región del mundo antes inaccesible. <strong>En la vida:</strong> ampliar tu vocabulario —emocional, intelectual, técnico— amplía literalmente lo que puedes experimentar y entender. La pobreza léxica es pobreza de mundo." },
+      { t: "De lo que no se puede hablar, hay que callar.", a: "Ludwig Wittgenstein", e: "Cierre del Tractatus: hay experiencias —lo místico, lo ético, lo estético— que el lenguaje proposicional no puede capturar sin traicionarlas. <strong>En la vida:</strong> no todo lo importante se dice. A veces hablar de más sobre algo profundo lo banaliza. El silencio compartido también es comunicación, y a menudo más exacta." },
       { t: "El hombre es un dios cuando sueña y un mendigo cuando reflexiona.", a: "Friedrich Hölderlin" },
       { t: "El que tiene imaginación, con qué facilidad saca de la nada un mundo.", a: "Gustavo Adolfo Bécquer" },
       { t: "La vida es un sueño, y los sueños, sueños son.", a: "Pedro Calderón de la Barca" },
@@ -247,16 +280,16 @@
       { t: "Sabemos lo que somos, pero no lo que podemos llegar a ser.", a: "William Shakespeare" },
       { t: "El hombre razonable se adapta al mundo; el irrazonable persiste en tratar de adaptar el mundo a sí mismo.", a: "George Bernard Shaw" },
       { t: "Quien se conoce a sí mismo es señor de sí.", a: "Pierre Charron" },
-      { t: "Nada grande se ha hecho en el mundo sin pasión.", a: "G. W. F. Hegel" },
-      { t: "El búho de Minerva alza su vuelo al atardecer.", a: "G. W. F. Hegel" },
+      { t: "Nada grande se ha hecho en el mundo sin pasión.", a: "G. W. F. Hegel", e: "La razón sola no mueve nada: necesita ser encendida por una pasión que la haga actuar. <strong>En la vida:</strong> los proyectos meramente racionales se abandonan al primer obstáculo. Lo que sostiene una obra grande es una pasión, casi un desequilibrio, que la razón solo organiza. Sin algo que te obsesione un poco, no harás nada relevante." },
+      { t: "El búho de Minerva alza su vuelo al atardecer.", a: "G. W. F. Hegel", e: "La filosofía siempre llega tarde: solo comprendemos una época cuando ya está terminando. <strong>En la vida:</strong> no esperes entender lo que estás viviendo mientras lo vives. Solo en retrospectiva tendrá forma. Esta paciencia te ahorra ansiedad por exigirte claridad antes de tiempo." },
       { t: "La filosofía es su tiempo aprehendido en pensamientos.", a: "G. W. F. Hegel" },
       { t: "Lo real es racional y lo racional es real.", a: "G. W. F. Hegel" },
       { t: "La historia universal es el progreso en la conciencia de la libertad.", a: "G. W. F. Hegel" },
-      { t: "El lenguaje es la casa del ser.", a: "Martin Heidegger" },
+      { t: "El lenguaje es la casa del ser.", a: "Martin Heidegger", e: "No es que usemos el lenguaje: el lenguaje nos habita y configura cómo aparecen las cosas para nosotros. <strong>En la vida:</strong> el modo en que nombras tu experiencia la construye. Llamar a algo «fracaso» o «aprendizaje», «trabajo» o «vocación», no describe — instituye. Cuida tus palabras: son los muros del cuarto donde vives." },
       { t: "Solo un Dios puede aún salvarnos.", a: "Martin Heidegger" },
       { t: "El hombre habita poéticamente la tierra.", a: "Martin Heidegger" },
       { t: "La pregunta por el ser cae hoy en el olvido.", a: "Martin Heidegger" },
-      { t: "Pensar es agradecer.", a: "Martin Heidegger" },
+      { t: "Pensar es agradecer.", a: "Martin Heidegger", e: "En alemán, «pensar» (Denken) y «agradecer» (Danken) tienen raíz común. Para Heidegger, el pensamiento auténtico es respuesta de gratitud a lo que se nos da: el ser, el mundo, los otros. <strong>En la vida:</strong> el opuesto del pensamiento no es la ignorancia, sino la ingratitud — dar todo por sentado. Quien agradece, piensa." },
       { t: "Cada uno es lo que persigue.", a: "Martin Heidegger" },
       { t: "El carácter del hombre es su destino.", a: "Heráclito" },
       { t: "La naturaleza ama ocultarse.", a: "Heráclito" },
@@ -343,18 +376,18 @@
       { t: "No hay nada tan absurdo que no haya sido dicho por algún filósofo.", a: "Cicerón, De la adivinación (44 a. C.)" },
       { t: "La amistad hace que la prosperidad sea más brillante, y aligera la adversidad dividiéndola y compartiéndola.", a: "Cicerón, De la amistad (44 a. C.)" },
 
-      { t: "Si te aflige algo externo, no es ese algo lo que te perturba, sino tu propio juicio sobre ello; y está en tu poder borrarlo ahora.", a: "Marco Aurelio, Meditaciones VIII, 47 (c. 175)" },
-      { t: "El alma se tiñe con el color de sus pensamientos.", a: "Marco Aurelio, Meditaciones V, 16 (c. 175)" },
-      { t: "Comienza la mañana diciéndote a ti mismo: hoy me encontraré con gente entrometida, ingrata, arrogante, deshonesta, celosa y agria. Y, sin embargo, son mis hermanos.", a: "Marco Aurelio, Meditaciones II, 1 (c. 175)" },
-      { t: "Lo que se interpone en el camino se convierte en el camino.", a: "Marco Aurelio, Meditaciones V, 20 (c. 175)" },
-      { t: "El mejor modo de vengarte de tus enemigos es no parecerte a ellos.", a: "Marco Aurelio, Meditaciones VI, 6 (c. 175)" },
-      { t: "Vives solamente ahora, en este momento fugaz. Todo lo demás o ya pasó o es incierto.", a: "Marco Aurelio, Meditaciones III, 10 (c. 175)" },
-      { t: "Acepta las cosas a las que el destino te ata, y ama a las personas con las que el destino te une, pero hazlo con todo tu corazón.", a: "Marco Aurelio, Meditaciones VI, 39 (c. 175)" },
-      { t: "Pronto habrás olvidado todas las cosas; y todas las cosas pronto te habrán olvidado a ti.", a: "Marco Aurelio, Meditaciones VII, 21 (c. 175)" },
+      { t: "Si te aflige algo externo, no es ese algo lo que te perturba, sino tu propio juicio sobre ello; y está en tu poder borrarlo ahora.", a: "Marco Aurelio, Meditaciones VIII, 47 (c. 175)", e: "El dolor de un suceso depende menos del suceso que de la interpretación que le aplicas. <strong>En la vida:</strong> entre estímulo y reacción hay un juicio, y ese juicio es tuyo. Cambiarlo no elimina el hecho, pero sí su peso emocional — y es lo único en lo que tienes poder directo." },
+      { t: "El alma se tiñe con el color de sus pensamientos.", a: "Marco Aurelio, Meditaciones V, 16 (c. 175)", e: "Te conviertes en aquello que rumias. Pensar repetidamente algo —rencores, miedos, envidias— termina coloreando todo lo que percibes. <strong>En la vida:</strong> elige con cuidado a qué le dedicas tu monólogo interno; con el tiempo, ese monólogo se vuelve tu carácter." },
+      { t: "Comienza la mañana diciéndote a ti mismo: hoy me encontraré con gente entrometida, ingrata, arrogante, deshonesta, celosa y agria. Y, sin embargo, son mis hermanos.", a: "Marco Aurelio, Meditaciones II, 1 (c. 175)", e: "Es la praemeditatio malorum estoica: anticipar lo difícil para no quedar a merced de su sorpresa. Reconocer la humanidad común no excusa el mal, pero impide deshumanizar al otro. <strong>En la vida:</strong> no esperes que el día sea fácil; ensaya cómo vas a responder cuando no lo sea." },
+      { t: "Lo que se interpone en el camino se convierte en el camino.", a: "Marco Aurelio, Meditaciones V, 20 (c. 175)", e: "El obstáculo no es una desviación del camino: es el camino. Lo que parece bloquearte es, en realidad, lo que te exige crecer. <strong>En la vida:</strong> cada dificultad contiene la forma exacta de la lección que necesitas. Sortearla no la elimina; atravesarla la convierte en aprendizaje." },
+      { t: "El mejor modo de vengarte de tus enemigos es no parecerte a ellos.", a: "Marco Aurelio, Meditaciones VI, 6 (c. 175)", e: "La venganza ordinaria te hunde al nivel del que te ofendió. La verdadera victoria está en mantener tu carácter intacto. <strong>En la vida:</strong> cuando alguien te trata mal, la tentación es responder en el mismo registro. Resistirla no es debilidad — es la única forma de no entregarle también tu integridad." },
+      { t: "Vives solamente ahora, en este momento fugaz. Todo lo demás o ya pasó o es incierto.", a: "Marco Aurelio, Meditaciones III, 10 (c. 175)", e: "Solo posees el instante presente; el pasado ya no es tuyo y el futuro aún no existe. <strong>En la vida:</strong> no puedes perder lo que no tienes — ni el ayer ni el mañana. Solo puedes perder el ahora, y solo si no lo habitas. La mayoría de las preocupaciones son visitas a tiempos que no existen." },
+      { t: "Acepta las cosas a las que el destino te ata, y ama a las personas con las que el destino te une, pero hazlo con todo tu corazón.", a: "Marco Aurelio, Meditaciones VI, 39 (c. 175)", e: "Amor fati: amar lo que la vida te trae en vez de pelearte con ello. No es resignación pasiva sino entrega activa. <strong>En la vida:</strong> mucho de tu agotamiento viene de querer que la realidad sea distinta de lo que es. Acepta lo dado, pero acéptalo plenamente — la entrega tibia agota más que la entrega total." },
+      { t: "Pronto habrás olvidado todas las cosas; y todas las cosas pronto te habrán olvidado a ti.", a: "Marco Aurelio, Meditaciones VII, 21 (c. 175)", e: "La impermanencia es total: no solo te morirás, también te olvidarán. Lo escribió el emperador más poderoso del mundo. <strong>En la vida:</strong> es liberador, no deprimente. Si nada de lo que hagas será recordado en mil años, ¿qué urgencia tiene el qué dirán de hoy? Vive más ligero." },
 
-      { t: "Una vida no examinada no merece ser vivida.", a: "Sócrates (Apología, 399 a. C.)" },
-      { t: "Solo sé que no sé nada.", a: "Sócrates (atribución platónica)" },
-      { t: "Conócete a ti mismo.", a: "Sócrates (oráculo de Delfos)" },
+      { t: "Una vida no examinada no merece ser vivida.", a: "Sócrates (Apología, 399 a. C.)", e: "Sócrates dijo esto en su juicio, prefiriendo la muerte a renunciar a cuestionarse. Vivir sin reflexión es funcionar, no vivir. <strong>En la vida:</strong> dedicar tiempo regular a revisar lo que haces y por qué no es un lujo intelectual — es lo que separa una biografía de una agenda." },
+      { t: "Solo sé que no sé nada.", a: "Sócrates (atribución platónica)", e: "Reconocer la propia ignorancia es el comienzo de la sabiduría: el necio cree saber y se cierra; el sabio sabe que no sabe y se mantiene abierto. <strong>En la vida:</strong> desconfía de tu certeza más firme. Las personas más interesantes son las que aún hacen preguntas; las más rígidas, las que ya tienen todas las respuestas." },
+      { t: "Conócete a ti mismo.", a: "Sócrates (oráculo de Delfos)", e: "Antes de buscar conocer el mundo, conoce el instrumento con el que lo miras: tú. Tus sesgos, miedos, deseos y heridas filtran toda percepción. <strong>En la vida:</strong> sin autoconocimiento no hay decisión libre — solo reacciones automáticas a tu propia historia no procesada." },
       { t: "El cuerpo es la cárcel del alma.", a: "Platón, Fedón (c. 380 a. C.)" },
       { t: "Aprender no es otra cosa que recordar.", a: "Platón, Menón (c. 385 a. C.)" },
       { t: "Los que filosofan rectamente se ejercitan en morir.", a: "Platón, Fedón (c. 380 a. C.)" },
@@ -362,14 +395,14 @@
       { t: "La virtud es un término medio entre dos vicios, el uno por exceso y el otro por defecto.", a: "Aristóteles, Ética a Nicómaco II (c. 340 a. C.)" },
       { t: "El amigo es otro yo.", a: "Aristóteles, Ética a Nicómaco IX (c. 340 a. C.)" },
       { t: "Todos los hombres por naturaleza desean saber.", a: "Aristóteles, Metafísica I (c. 350 a. C.)" },
-      { t: "Pienso, luego existo.", a: "René Descartes, Discurso del método (1637)" },
-      { t: "Para examinar la verdad, es preciso, una vez en la vida, poner en duda todas las cosas en cuanto sea posible.", a: "René Descartes, Principios de la filosofía (1644)" },
-      { t: "El hombre es una caña, la más débil de la naturaleza; pero es una caña pensante.", a: "Blaise Pascal, Pensamientos, fr. 200 (1670)" },
-      { t: "Si Dios existe, lo ganamos todo; si no existe, no perdemos nada. Apuesta entonces sin titubear que existe.", a: "Blaise Pascal, Pensamientos, fr. 233 (1670)" },
-      { t: "Toda la desgracia de los hombres procede de una sola cosa: no saber estar tranquilo en una habitación.", a: "Blaise Pascal, Pensamientos, fr. 139 (1670)" },
-      { t: "La angustia es el vértigo de la libertad.", a: "Søren Kierkegaard, El concepto de la angustia (1844)" },
-      { t: "La verdad es subjetividad.", a: "Søren Kierkegaard, Postscriptum no científico (1846)" },
-      { t: "El mayor peligro, perderse a uno mismo, puede pasar en el mundo tan en silencio como si nada fuera.", a: "Søren Kierkegaard, La enfermedad mortal (1849)" },
+      { t: "Pienso, luego existo.", a: "René Descartes, Discurso del método (1637)", e: "Buscando un cimiento indudable, Descartes nota que incluso al dudar de todo, hay alguien dudando. La existencia se afirma en el acto mismo de pensar. <strong>En la vida:</strong> bajo cualquier crisis de identidad o de mundo, queda un núcleo: el «yo que piensa» esto. Esa es la base más sólida que tienes." },
+      { t: "Para examinar la verdad, es preciso, una vez en la vida, poner en duda todas las cosas en cuanto sea posible.", a: "René Descartes, Principios de la filosofía (1644)", e: "La duda metódica: someter cada creencia heredada a examen para conservar solo lo que sobrevive a la crítica. <strong>En la vida:</strong> una vez al menos, revisa de dónde sacaste tus ideas más firmes — sobre la familia, el trabajo, lo que «se hace». Muchas no son tuyas, solo nunca las cuestionaste." },
+      { t: "El hombre es una caña, la más débil de la naturaleza; pero es una caña pensante.", a: "Blaise Pascal, Pensamientos, fr. 200 (1670)", e: "Físicamente somos frágiles: una gota de agua, una piedra, basta para matarnos. Pero sabemos que nos matan, y el universo no sabe que nos mata. <strong>En la vida:</strong> tu fragilidad no es debilidad — es la condición misma de tu conciencia. Lo que te mata no te entiende; tú sí." },
+      { t: "Si Dios existe, lo ganamos todo; si no existe, no perdemos nada. Apuesta entonces sin titubear que existe.", a: "Blaise Pascal, Pensamientos, fr. 233 (1670)", e: "La famosa apuesta de Pascal: ante la incertidumbre absoluta sobre Dios, el cálculo racional favorece creer. <strong>En la vida:</strong> más allá del tema religioso, es un modelo de decisión bajo incertidumbre: cuando no puedes saber, calcula qué pierdes y qué ganas con cada opción y elige la asimetría favorable." },
+      { t: "Toda la desgracia de los hombres procede de una sola cosa: no saber estar tranquilo en una habitación.", a: "Blaise Pascal, Pensamientos, fr. 139 (1670)", e: "El ser humano huye del silencio porque le obliga a encontrarse consigo mismo. Por eso busca constantemente distracciones: trabajo, ruido, pantallas, viajes. <strong>En la vida:</strong> si no puedes estar a solas contigo media hora sin agitarte, lo que estás evitando no es el aburrimiento — eres tú." },
+      { t: "La angustia es el vértigo de la libertad.", a: "Søren Kierkegaard, El concepto de la angustia (1844)", e: "Frente a un abismo, no temes caer: temes querer saltar. La angustia surge al descubrir que puedes elegir cualquier cosa. <strong>En la vida:</strong> mucho de tu malestar no viene de no poder hacer algo, sino de la conciencia abrumadora de que podrías hacer demasiadas cosas. La libertad real da miedo." },
+      { t: "La verdad es subjetividad.", a: "Søren Kierkegaard, Postscriptum no científico (1846)", e: "Hay verdades que solo existen cuando alguien las asume con su existencia entera — no basta con conocerlas, hay que vivirlas. <strong>En la vida:</strong> repetir una idea correcta sin que te transforme es falsa sabiduría. Lo que sabes pero no encarnas, no lo sabes realmente." },
+      { t: "El mayor peligro, perderse a uno mismo, puede pasar en el mundo tan en silencio como si nada fuera.", a: "Søren Kierkegaard, La enfermedad mortal (1849)", e: "Perder un objeto, una casa, un trabajo, son pérdidas ruidosas. Perderse a uno mismo es callado: sucede año tras año por mil cesiones pequeñas. <strong>En la vida:</strong> revisa qué has dejado en el camino para ser aceptado, productivo o invisible. La autotraición rara vez es un acto único; es una erosión lenta." },
 
       { t: "Nos hiciste, Señor, para ti, y nuestro corazón está inquieto hasta que descanse en ti.", a: "San Agustín, Confesiones I, 1 (397-400)" },
       { t: "Tarde te amé, hermosura tan antigua y tan nueva, tarde te amé. Tú estabas dentro de mí, y yo fuera, y por fuera te buscaba.", a: "San Agustín, Confesiones X, 27 (397-400)" },
@@ -436,6 +469,8 @@
       const newBtn = document.getElementById('newQuote');
       const copyBtn = document.getElementById('copyQuote');
       const shareBtn = document.getElementById('shareQuote');
+      const toggleMeaningBtn = document.getElementById('toggleMeaning');
+      const meaningEl = document.getElementById('meaning');
 
       const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
       const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -464,7 +499,28 @@
         }
         quoteEl.textContent = q.t;
         authorEl.textContent = q.a;
+        meaningEl.hidden = true;
+        meaningEl.innerHTML = '';
+        if (q.e) {
+          toggleMeaningBtn.hidden = false;
+          toggleMeaningBtn.textContent = 'Ver significado';
+        } else {
+          toggleMeaningBtn.hidden = true;
+        }
       }
+
+      toggleMeaningBtn.addEventListener('click', () => {
+        const q = current;
+        if (!q || !q.e) return;
+        if (meaningEl.hidden) {
+          meaningEl.innerHTML = q.e;
+          meaningEl.hidden = false;
+          toggleMeaningBtn.textContent = 'Ocultar';
+        } else {
+          meaningEl.hidden = true;
+          toggleMeaningBtn.textContent = 'Ver significado';
+        }
+      });
 
       function showHint(text) {
         hintEl.textContent = text;
